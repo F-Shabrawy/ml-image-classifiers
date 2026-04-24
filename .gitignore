@@ -1,0 +1,27 @@
+# Data
+data/raw/
+data/processed/
+*.pkl
+*.pth
+*.h5
+
+# IDE
+.vscode/
+.idea/
+*.pyc
+__pycache__/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models
+models/*.pkl
+models/*.pth
+
+# Results cache
+*.csv
