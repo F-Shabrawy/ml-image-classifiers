@@ -25,3 +25,4 @@ models/*.pth
 
 # Results cache
 *.csv
+.venv/
