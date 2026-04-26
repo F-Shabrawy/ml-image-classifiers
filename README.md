@@ -2,7 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-1.24%2B-013243?style=flat-square&logo=numpy&logoColor=white)
-![Status](https://img.shields.io/badge/Status-Complete-22c55e?style=flat-square)
+![Status](https://img.shields.io/badge/Status-In%20Progress-eab308?style=flat-square)
 ![Dataset](https://img.shields.io/badge/Dataset-MNIST-orange?style=flat-square)
 
 > A **pure NumPy** implementation of Logistic Regression for binary classification of handwritten digits from the MNIST dataset — built from mathematical first principles, without any high-level ML estimators.
