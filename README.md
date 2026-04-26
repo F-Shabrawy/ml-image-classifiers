@@ -2,7 +2,6 @@
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-1.24%2B-013243?style=flat-square&logo=numpy&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)
 ![Status](https://img.shields.io/badge/Status-Complete-22c55e?style=flat-square)
 ![Dataset](https://img.shields.io/badge/Dataset-MNIST-orange?style=flat-square)
 
@@ -169,7 +168,7 @@ This will:
 ```
 Training complete and model saved.
 Actual iterations run: 15000
-Final Loss: 0.1093
+Final Loss: 0.1032
 Train Accuracy:  0.9632
 Test Accuracy:  0.9597
 Train Precision:  0.8654
@@ -253,8 +252,8 @@ The confusion matrix is generated automatically after training:
 
 ```
                  Predicted: 0    Predicted: 1
-Actual: 0          12,472             171
-Actual: 1             393             964
+Actual: 0          12,469             171
+Actual: 1             394             966
 ```
 
 *(Values are illustrative; exact counts depend on the train/test split seed.)*
@@ -271,12 +270,6 @@ Actual: 1             393             964
 | **Multi-class extension** | Extend to full 10-class classification using a One-vs-All or Softmax approach |
 | **Learning curve plots** | Plot training loss per iteration to visualize convergence behavior |
 | **Regularization** | Add L2 (Ridge) regularization to the cost function to reduce overfitting |
-
----
-
-## 📄 License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ---
 
