@@ -59,7 +59,7 @@ $$
 
 $$\frac{\partial j}{\partial \theta_k}=
 [-\frac{1}{m}] \times
-[\frac{y}{h}-\frac{\ell-y}{1-h}] \times
+[\frac{y}{h}-\frac{1-y}{1-h}] \times
 [h(1-h)]\times
 X_k
 $$
@@ -70,4 +70,4 @@ $$\nabla_\theta J(\theta)=-\frac{1}{m}X^T(h(\theta X)-y)$$
 $$\boxed{\nabla_\theta J(\theta)=\frac{1}{m}X^T(y-h(\theta X))}$$
 
 **Parameter update rule:**
-$$\boxed{\theta_{new}=\theta_{old}-\lambda J(\theta)}$$ 
+$$\boxed{\theta_{new}=\theta_{old}-\lambda J(\theta)}$$

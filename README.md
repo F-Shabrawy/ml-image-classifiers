@@ -166,17 +166,13 @@ This will:
 ### 4. Expected Console Output
 
 ```
-Training complete and model saved.
-Actual iterations run: 15000
-Final Loss: 0.1032
-Train Accuracy:  0.9632
-Test Accuracy:  0.9597
-Train Precision:  0.8654
-Test Precision:  0.8493
-Train Recall:  0.7251
-Test Recall:  0.7104
-Train F1 Score:  0.7891
-Test F1 Score:  0.7736
+training complete and model saved.
+iterations: 15000
+Final Loss: 0.1092
+Test Accuracy:  0.9588571428571429
+Test Precision:  0.8091844813935075
+Test Recall:  0.7531319086219602
+Test F1 Score:  0.7801526717557252
 ```
 
 ---
@@ -223,26 +219,26 @@ Labels are re-encoded accordingly before training.
 
 ## 📊 Results
 
-Training configuration: **15000 iterations**, **learning rate α = 1.1**
+Training configuration: **15000 iterations**, **learning rate α = 1.3**
 
 ### Performance Metrics
 
 | Metric | Score |
 |---|---|
-| **Accuracy** | ~96.0%|
-| **Precision** | ~84.9%|
-| **Recall** | ~71.0% |
-| **F1-Score** | ~77.4% |
+| **Accuracy** | ~95.88%|
+| **Precision** | ~80.92%|
+| **Recall** | ~75.31% |
+| **F1-Score** | ~78.02% |
 
 ### Interpretation
 
-The high **accuracy (~96.0%)** is partially inflated by the class imbalance inherent to one-vs-all MNIST classification — digits other than `8` constitute the large majority of samples.
+The high **accuracy (~95.88%)** is partially inflated by the class imbalance inherent to one-vs-all MNIST classification — digits other than `8` constitute the large majority of samples.
 
 The more informative metrics reveal the real picture:
 
-- **Precision (~84.9%):** When the model predicts a digit is `8`, it is correct about 8.5 out of 10 times. This indicates relatively low false positives.
-- **Recall (~71.0%):** The model successfully identifies a strong majority (about 71%) of all actual `8`s in the test set, meaning some true `8`s are still missed (false negatives).
-- **F1-Score (~77.4%):** The harmonic mean reflects the improved balance between Precision and Recall. The model is performing well, but still leaves room for improvement on recall due to class imbalance.
+- **Precision (~80.92%):** When the model predicts a digit is `8`, it is correct about 8 out of 10 times. This indicates relatively low false positives.
+- **Recall (~75.31%):** The model successfully identifies a strong majority (about 75%) of all actual `8`s in the test set, meaning some true `8`s are still missed (false negatives).
+- **F1-Score (~78.02%):** The harmonic mean reflects the improved balance between Precision and Recall. The model is performing well, but still leaves room for improvement on recall due to class imbalance.
 
 This behavior is typical when applying a vanilla Gradient Descent classifier to an imbalanced binary task without threshold tuning or class weighting.
 
@@ -252,8 +248,8 @@ The confusion matrix is generated automatically after training:
 
 ```
                  Predicted: 0    Predicted: 1
-Actual: 0          12,469             171
-Actual: 1             394             966
+Actual: 0          12,402             241
+Actual: 1             335             1022
 ```
 
 *(Values are illustrative; exact counts depend on the train/test split seed.)*
@@ -264,11 +260,8 @@ Actual: 1             394             966
 
 | Idea | Description |
 |---|---|
-| **Threshold tuning** | Adjust the decision boundary (default `0.5`) to improve Recall at the cost of some Precision |
 | **Class weighting** | Weight the loss function to penalize false negatives more heavily and handle imbalance |
-| **Feature engineering** | Add pixel interaction features or apply PCA for dimensionality reduction |
 | **Multi-class extension** | Extend to full 10-class classification using a One-vs-All or Softmax approach |
-| **Learning curve plots** | Plot training loss per iteration to visualize convergence behavior |
 | **Regularization** | Add L2 (Ridge) regularization to the cost function to reduce overfitting |
 
 ---
