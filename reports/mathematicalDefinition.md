@@ -46,7 +46,7 @@ $$\ell(\theta)=\sum_{i=1}^{m}y_iln(h_\theta(X_i))+(1-y_i)ln(1-h_\theta(X_i))$$
 - When y=1: only the first term matters
 - When y=0: only the second term matters
 ### 6- Cross entropy loss
-$$j(\theta)=-\frac{1}{m}\sum_{i=1}^{m}y_iln(h_\theta(X_i))+(1-y_i)ln(1-h_\theta(X_i))$$
+$$\boxed{j(\theta)=-\frac{1}{m}\sum_{i=1}^{m}y_iln(h_\theta(X_i))+(1-y_i)ln(1-h_\theta(X_i))}$$
 
 ### 7- Gradient decent
 Use the chain rule to compute how the cost changes with respect to each parameter

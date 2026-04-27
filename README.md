@@ -67,6 +67,16 @@ Where:
 - $y^{(i)}$ is the true binary label (`1` for digit `8`, `0` otherwise)
 - $\hat{y}^{(i)} = \sigma(\theta^T x^{(i)})$ is the predicted probability
 
+In code, this is implemented directly in NumPy:
+
+```python
+def compute_loss(y, y_hat):
+    m = y.size
+    epsilon = 1e-15
+    y_hat = np.clip(y_hat, epsilon, 1 - epsilon)
+    return - (1 / m) * np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
+```
+
 ### 3. Gradient Descent Update Rule
 
 At each iteration, the parameters $\theta$ are updated by moving in the direction of the **negative gradient** of the loss:
