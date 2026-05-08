@@ -124,8 +124,8 @@ mnist-logistic-regression/
 | File | Responsibility |
 |---|---|
 | `src/data_loader.py` | Fetches MNIST from OpenML, normalizes pixels, extracts HOG features, encodes binary labels, performs 3-way train/val/test split |
-| `src/logistic_regression.py` | Contains the `LogisticRegression` class with `fit()`, `predict()`, `sigmoid()`, `save()`, and `load()` methods |
-| `src/utils.py` | Computes Accuracy, Precision, Recall, F1-Score; renders the Confusion Matrix & loss curves |
+| `src/logistic_regression.py` | Contains the `LogisticRegression` class with `fit()` (supports val loss tracking), `predict()`, `sigmoid()`, `save()`, and `load()` methods |
+| `src/utils.py` | Computes Accuracy, Precision, Recall, F1-Score, Confusion Matrix from scratch (no sklearn); saves plots to files |
 | `train_final.py` | Orchestrates the end-to-end pipeline: load data → train → evaluate → save weights |
 | `notebooks/modelTrial.ipynb` | Sandbox for visual EDA, hyperparameter experiments, HOG param tuning, and prototype runs |
 
@@ -160,7 +160,7 @@ scikit-learn
 scikit-image
 ```
 
-> **Note:** `scikit-learn` is used **only** for fetching the MNIST dataset (`fetch_openml`) and computing evaluation metrics. `scikit-image` provides the HOG feature extractor. The Logistic Regression model itself is implemented entirely in NumPy.
+> **Note:** `scikit-learn` is used **only** for fetching the MNIST dataset (`fetch_openml`). `scikit-image` provides the HOG feature extractor. All evaluation metrics and the model itself are implemented entirely in NumPy.
 
 ### 3. Train the Model
 
@@ -172,30 +172,30 @@ This will:
 1. Fetch the MNIST dataset via OpenML (cached after first download)
 2. Extract HOG features from each image (orientations=9, 4×4 cells, 3×3 blocks)
 3. Split data into train/val/test (80/10/10)
-4. Train the Logistic Regression model for **15000 iterations** at **learning rate 1.3**
+4. Train the Logistic Regression model for **2000 iterations** at **learning rate 1.3**
 5. Print train, val, and test evaluation metrics to the console
 6. Save the trained `theta` weights to the `models/` directory
-7. Display the Confusion Matrix and loss curves
+7. Save Confusion Matrix and loss curves to `results/plots/`
 
 ### 4. Expected Console Output
 
 ```
 training complete and model saved.
-iterations: 15000
-Final Train Loss: 0.0752
-Final Val Loss: 0.1432
-Train Accuracy:  0.9782
-Val Accuracy:  0.9600
-Test Accuracy:  0.9620
-Train Precision:  0.9142
-Val Precision:  0.8610
-Test Precision:  0.8683
-Train Recall:  0.8253
-Val Recall:  0.7950
-Test Recall:  0.7801
-Train F1 Score:  0.8675
-Val F1 Score:  0.8267
-Test F1 Score:  0.8220
+iterations: 2000
+Final Train Loss: 0.0419
+Final Val Loss: 0.0477
+Train Accuracy: 0.9860
+Train Precision: 0.9347
+Train Recall: 0.9208
+Train F1 Score: 0.9277
+Val Accuracy: 0.9830
+Val Precision: 0.9220
+Val Recall: 0.9104
+Val F1 Score: 0.9161
+Test Accuracy: 0.9847
+Test Precision: 0.9268
+Test Recall: 0.9051
+Test F1 Score: 0.9158
 ```
 
 ---
@@ -222,8 +222,11 @@ This implementation deliberately avoids `sklearn.linear_model.LogisticRegression
 | **Gradient computation** | `(1/m) * X.T @ (y_hat - y)` — vectorized matrix operation |
 | **Parameter update** | `theta -= learning_rate * gradient` — in-place NumPy update |
 | **Loss tracking** | Cross-entropy computed each iteration for convergence monitoring |
+| **Accuracy** | `mean(y_pred == y_true)` — pure NumPy |
+| **Precision, Recall, F1** | Built from per-class confusion matrix counts — no sklearn |
+| **Confusion Matrix** | `zeros((n,n))` populated by iterating over predictions — no sklearn |
 
-This design makes every mathematical step explicit and auditable.
+No evaluation metrics from sklearn are used. Everything is computed from scratch for transparency.
 
 ### Model Persistence
 
@@ -231,10 +234,10 @@ Trained parameters are saved and loaded using NumPy's native binary format:
 
 ```python
 # Save
-np.save('models/theta.npy', self.theta)
+np.save('models/hog_lr_13_2000.npy', self.theta)
 
 # Load
-self.theta = np.load('models/theta.npy')
+self.theta = np.load('models/hog_lr_13_2000.npy')
 ```
 
 This allows the trained model to be reloaded instantly for inference without retraining.
@@ -262,28 +265,28 @@ Labels are re-encoded accordingly before training.
 
 ## 📊 Results
 
-Training configuration: **15000 iterations**, **learning rate α = 1.3**, **HOG features (or=9, ppc=(4,4), cpb=(3,3))**
+Training configuration: **2000 iterations**, **learning rate α = 1.3**, **HOG features (or=9, ppc=(4,4), cpb=(3,3))**
 
 ### Performance Metrics
 
 | Metric | Train | Val | Test |
 |---|---|---|---|
-| **Accuracy** | ~97.82% | ~96.00% | ~96.20% |
-| **Precision** | ~91.42% | ~86.10% | ~86.83% |
-| **Recall** | ~82.53% | ~79.50% | ~78.01% |
-| **F1-Score** | ~86.75% | ~82.67% | ~82.20% |
+| **Accuracy** | 98.60% | 98.30% | 98.47% |
+| **Precision** | 93.47% | 92.20% | 92.68% |
+| **Recall** | 92.08% | 91.04% | 90.51% |
+| **F1-Score** | 92.77% | 91.61% | 91.58% |
 
 ### Interpretation
 
-HOG features significantly improved recall (+3%) and F1 (+4%) over raw pixel features. The train/val gap stays within ~2%, suggesting the model generalizes well without severe overfitting.
+HOG features dramatically improved performance over raw pixels. The train/val gap is under 1%, meaning the model generalizes well with no overfitting.
 
-- **Precision (~86.83%):** When the model predicts a digit is `8`, it is correct about 87% of the time.
-- **Recall (~78.01%):** The model identifies about 78% of all actual `8`s — a notable improvement from ~75% with raw pixels.
-- **F1-Score (~82.20%):** Up from ~78%, showing HOG's structural edge features help.
+- **Recall jumped from ~75% (raw pixels) to ~90%** — HOG's edge orientation features help the model recognize digit `8` much more reliably.
+- **F1-Score at ~91.6%** — a 14-point improvement over raw pixels, showing HOG captures structural patterns better than flat intensities.
+- The model converges in **2000 iterations** vs 15000 needed for raw pixels — HOG features are more informative per dimension.
 
 ### Confusion Matrix
 
-The confusion matrix is generated automatically after training:
+The confusion matrix is saved to `results/plots/cm.png` after training:
 
 ```
                  Predicted: 0    Predicted: 1
