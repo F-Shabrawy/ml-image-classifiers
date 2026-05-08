@@ -5,7 +5,7 @@
 ![Status](https://img.shields.io/badge/Status-In%20Progress-eab308?style=flat-square)
 ![Dataset](https://img.shields.io/badge/Dataset-MNIST-orange?style=flat-square)
 
-> A **pure NumPy** implementation of Logistic Regression for binary classification of handwritten digits from the MNIST dataset — built from mathematical first principles, without any high-level ML estimators.
+> A **pure NumPy** implementation of Logistic Regression with **HOG feature extraction** for binary classification of handwritten digits from the MNIST dataset — built from mathematical first principles, without any high-level ML estimators.
 
 ---
 
@@ -30,7 +30,8 @@ The goal is not to achieve state-of-the-art accuracy, but to **deeply understand
 ### Highlights
 
 - ✅ Logistic Regression with Gradient Descent — **zero `sklearn` estimators used**
-- ✅ Full preprocessing pipeline: normalization + binary label encoding
+- ✅ HOG feature extraction captures edge patterns better than raw pixels
+- ✅ Full preprocessing pipeline: normalization + HOG + 3-way split (train/val/test)
 - ✅ Model persistence: save and reload trained weights (`.npy` format)
 - ✅ Comprehensive evaluation: Accuracy, Precision, Recall, F1-Score, Confusion Matrix
 - ✅ Clean Matplotlib-based visualizations
@@ -102,12 +103,13 @@ The update is applied for a fixed number of **iterations** until convergence.
 mnist-logistic-regression/
 │
 ├── src/
-│   ├── data_loader.py          # Fetches MNIST via OpenML, splits into train/test sets
+│   ├── __init__.py             # Makes src a proper package
+│   ├── data_loader.py          # Fetches MNIST via OpenML, extracts HOG features, splits into train/val/test
 │   ├── logistic_regression.py  # Core model: Sigmoid, Gradient Descent, Save/Load
 │   └── utils.py                # Metrics computation & Confusion matrix plotting
 │
 ├── notebooks/
-│   └── modelTrial.ipynb        # Exploratory data analysis and experimental runs
+│   └── modelTrial.ipynb        # Exploratory data analysis, hyperparameter tuning, HOG experiments
 │
 ├── models/
 │   └── *.npy                   # Saved model weights (theta parameters)
@@ -121,11 +123,11 @@ mnist-logistic-regression/
 
 | File | Responsibility |
 |---|---|
-| `src/data_loader.py` | Fetches MNIST from OpenML, normalizes pixels to `[0, 1]`, encodes binary labels, performs train/test split |
+| `src/data_loader.py` | Fetches MNIST from OpenML, normalizes pixels, extracts HOG features, encodes binary labels, performs 3-way train/val/test split |
 | `src/logistic_regression.py` | Contains the `LogisticRegression` class with `fit()`, `predict()`, `sigmoid()`, `save()`, and `load()` methods |
-| `src/utils.py` | Computes Accuracy, Precision, Recall, F1-Score; renders the Confusion Matrix |
+| `src/utils.py` | Computes Accuracy, Precision, Recall, F1-Score; renders the Confusion Matrix & loss curves |
 | `train_final.py` | Orchestrates the end-to-end pipeline: load data → train → evaluate → save weights |
-| `notebooks/modelTrial.ipynb` | Sandbox for visual EDA, hyperparameter experiments, and prototype runs |
+| `notebooks/modelTrial.ipynb` | Sandbox for visual EDA, hyperparameter experiments, HOG param tuning, and prototype runs |
 
 ---
 
@@ -155,9 +157,10 @@ pip install -r requirements.txt
 numpy
 matplotlib
 scikit-learn
+scikit-image
 ```
 
-> **Note:** `scikit-learn` is used **only** for fetching the MNIST dataset (`fetch_openml`) and computing evaluation metrics. The Logistic Regression model itself is implemented entirely in NumPy.
+> **Note:** `scikit-learn` is used **only** for fetching the MNIST dataset (`fetch_openml`) and computing evaluation metrics. `scikit-image` provides the HOG feature extractor. The Logistic Regression model itself is implemented entirely in NumPy.
 
 ### 3. Train the Model
 
@@ -167,27 +170,47 @@ python train_final.py
 
 This will:
 1. Fetch the MNIST dataset via OpenML (cached after first download)
-2. Preprocess and split the data
-3. Train the Logistic Regression model for **15000 iterations** at **learning rate 1.1**
-4. Print evaluation metrics to the console
-5. Save the trained `theta` weights to the `models/` directory
-6. Display the Confusion Matrix plot
+2. Extract HOG features from each image (orientations=9, 4×4 cells, 3×3 blocks)
+3. Split data into train/val/test (80/10/10)
+4. Train the Logistic Regression model for **15000 iterations** at **learning rate 1.3**
+5. Print train, val, and test evaluation metrics to the console
+6. Save the trained `theta` weights to the `models/` directory
+7. Display the Confusion Matrix and loss curves
 
 ### 4. Expected Console Output
 
 ```
 training complete and model saved.
 iterations: 15000
-Final Loss: 0.1092
-Test Accuracy:  0.9588571428571429
-Test Precision:  0.8091844813935075
-Test Recall:  0.7531319086219602
-Test F1 Score:  0.7801526717557252
+Final Train Loss: 0.0752
+Final Val Loss: 0.1432
+Train Accuracy:  0.9782
+Val Accuracy:  0.9600
+Test Accuracy:  0.9620
+Train Precision:  0.9142
+Val Precision:  0.8610
+Test Precision:  0.8683
+Train Recall:  0.8253
+Val Recall:  0.7950
+Test Recall:  0.7801
+Train F1 Score:  0.8675
+Val F1 Score:  0.8267
+Test F1 Score:  0.8220
 ```
 
 ---
 
 ## 🔧 Implementation Notes
+
+### HOG Feature Extraction
+
+Instead of feeding raw pixel values into the classifier, images are first transformed using **Histogram of Oriented Gradients (HOG)**:
+
+- **orientations=9**: Captures edges in 8 directions + 1
+- **pixels_per_cell=(4,4)**: Each 4×4 cell produces 1 gradient histogram
+- **cells_per_block=(3,3)**: Normalizes across 3×3 blocks of cells
+
+This reduces noise and emphasizes structural edge patterns, improving generalization.
 
 ### Pure NumPy — No `sklearn` Estimators
 
@@ -216,6 +239,16 @@ self.theta = np.load('models/theta.npy')
 
 This allows the trained model to be reloaded instantly for inference without retraining.
 
+### Train/Validation/Test Split
+
+Data is split into three sets for better hyperparameter tuning and bias-variance diagnosis:
+
+- **Training (80%)**: Model fitting and gradient descent
+- **Validation (10%)**: Held-out during training — used to track overfitting
+- **Test (10%)**: Final untouched evaluation set
+
+Validation loss is tracked alongside training loss to detect divergence early.
+
 ### Binary Classification Setup
 
 Although MNIST contains 10 classes (`0`–`9`), this project frames it as a **one-vs-all binary problem**:
@@ -229,28 +262,24 @@ Labels are re-encoded accordingly before training.
 
 ## 📊 Results
 
-Training configuration: **15000 iterations**, **learning rate α = 1.3**
+Training configuration: **15000 iterations**, **learning rate α = 1.3**, **HOG features (or=9, ppc=(4,4), cpb=(3,3))**
 
 ### Performance Metrics
 
-| Metric | Score |
-|---|---|
-| **Accuracy** | ~95.88%|
-| **Precision** | ~80.92%|
-| **Recall** | ~75.31% |
-| **F1-Score** | ~78.02% |
+| Metric | Train | Val | Test |
+|---|---|---|---|
+| **Accuracy** | ~97.82% | ~96.00% | ~96.20% |
+| **Precision** | ~91.42% | ~86.10% | ~86.83% |
+| **Recall** | ~82.53% | ~79.50% | ~78.01% |
+| **F1-Score** | ~86.75% | ~82.67% | ~82.20% |
 
 ### Interpretation
 
-The high **accuracy (~95.88%)** is partially inflated by the class imbalance inherent to one-vs-all MNIST classification — digits other than `8` constitute the large majority of samples.
+HOG features significantly improved recall (+3%) and F1 (+4%) over raw pixel features. The train/val gap stays within ~2%, suggesting the model generalizes well without severe overfitting.
 
-The more informative metrics reveal the real picture:
-
-- **Precision (~80.92%):** When the model predicts a digit is `8`, it is correct about 8 out of 10 times. This indicates relatively low false positives.
-- **Recall (~75.31%):** The model successfully identifies a strong majority (about 75%) of all actual `8`s in the test set, meaning some true `8`s are still missed (false negatives).
-- **F1-Score (~78.02%):** The harmonic mean reflects the improved balance between Precision and Recall. The model is performing well, but still leaves room for improvement on recall due to class imbalance.
-
-This behavior is typical when applying a vanilla Gradient Descent classifier to an imbalanced binary task without threshold tuning or class weighting.
+- **Precision (~86.83%):** When the model predicts a digit is `8`, it is correct about 87% of the time.
+- **Recall (~78.01%):** The model identifies about 78% of all actual `8`s — a notable improvement from ~75% with raw pixels.
+- **F1-Score (~82.20%):** Up from ~78%, showing HOG's structural edge features help.
 
 ### Confusion Matrix
 
@@ -269,10 +298,11 @@ Actual: 1             335             1022
 ## 🔭 Future Improvements
 
 | Idea | Description |
-|---|---|
+|---|---|---|
 | **Class weighting** | Weight the loss function to penalize false negatives more heavily and handle imbalance |
-| **Multi-class extension** | Extend to full 10-class classification using a One-vs-All or Softmax approach |
-| **Regularization** | Add L2 (Ridge) regularization to the cost function to reduce overfitting |
+| **Multi-class extension** | Extend to full 10-class classification using Softmax regression |
+| **Regularization (L1/L2)** | Add Ridge or Lasso regularization to the cost function to reduce overfitting |
+| **Cross-validation** | Use k-fold CV to tune hyperparameters (alpha, HOG params) |
 
 ---
 
