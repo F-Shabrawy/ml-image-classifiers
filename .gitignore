@@ -26,3 +26,6 @@ models/*.pth
 # Results cache
 *.csv
 .venv/
+
+# Planning
+PLAN.md

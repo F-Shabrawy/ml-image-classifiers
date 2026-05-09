@@ -28,7 +28,7 @@ def precision_recall_f1_per_class(cm):
         f1s.append(f1)
     return precisions, recalls, f1s
 
-def print_metrics(y_train, y_pred_train, y_val, y_pred_val, y_test, y_pred_test, model, save_dir="results/plots"):
+def print_metrics(y_train, y_pred_train, y_val, y_pred_val, y_test, y_pred_test, model):
     num_classes = len(np.unique(np.concatenate([y_train, y_val, y_test])))
 
     for name, y_true, y_pred in [("Train", y_train, y_pred_train),
@@ -49,11 +49,10 @@ def print_metrics(y_train, y_pred_train, y_val, y_pred_val, y_test, y_pred_test,
             print(f"{name} Recall (macro): {np.mean(recs):.4f}")
             print(f"{name} F1 Score (macro): {np.mean(f1s):.4f}")
 
-    os.makedirs(save_dir, exist_ok=True)
-    plot_confusion_matrix(y_test, y_pred_test, num_classes, save_dir)
-    plot_loss_curves(model, save_dir)
+    plot_confusion_matrix(y_test, y_pred_test, num_classes)
+    # plot_loss_curves(model)
 
-def plot_confusion_matrix(y_true, y_pred, num_classes=2, save_dir="results/plots"):
+def plot_confusion_matrix(y_true, y_pred, num_classes=2):
     cm = confusion_matrix(y_true, y_pred, num_classes)
     fig, ax = plt.subplots()
     ax.imshow(cm, cmap=plt.cm.Blues)
@@ -66,10 +65,9 @@ def plot_confusion_matrix(y_true, y_pred, num_classes=2, save_dir="results/plots
         for j in range(num_classes):
             ax.text(j, i, str(cm[i, j]), ha="center", va="center")
     plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, "cm.png"))
-    plt.close()
+    plt.show()
 
-def plot_loss_curves(model, save_dir="results/plots"):
+def plot_loss_curves(model):
     plt.plot(model.losses, label=f"train alpha={model.alpha} iter={model.num_iter}")
     if model.val_losses and len(model.val_losses) > 0:
         plt.plot(model.val_losses, label=f"val alpha={model.alpha}")
@@ -78,5 +76,4 @@ def plot_loss_curves(model, save_dir="results/plots"):
     plt.ylabel("Loss")
     plt.title("loss curve")
     plt.tight_layout()
-    plt.savefig(os.path.join(save_dir, "loss.png"))
-    plt.close()
+    plt.show()
