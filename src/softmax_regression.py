@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from data_loader import load_mnist_multiclass
-from utils import print_metrics, accuracy
+from .data_loader import load_mnist_multiclass
+from .utils import print_metrics, accuracy
 
 def softmax(z):
     # numerically stable softmax (subtract max before exp)

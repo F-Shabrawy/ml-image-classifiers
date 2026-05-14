@@ -1,6 +1,6 @@
 import numpy as np
-from data_loader import load_mnist
-from utils import print_metrics
+from .data_loader import load_mnist
+from .utils import print_metrics
 
 def sigmoid(z):
     # squashes any real number into a probability between 0 and 1
@@ -71,16 +71,3 @@ class LogisticRegression:
 
     def load_model(self, file_path):
         self.theta = np.load(file_path)
-
-model = LogisticRegression(alpha=1.3, num_iter=2000)
-model.fit(X_train, y_train, X_val=X_val, y_val=y_val)
-print(f"iterations: {model.actual_iter}")
-if model.losses:
-    print(f"final train loss: {model.losses[-1]:.4f}")
-if model.val_losses:
-    print(f"final val loss: {model.val_losses[-1]:.4f}")
-
-y_pred_train = model.predict(X_train, threshold=0.4)
-y_pred_val = model.predict(X_val, threshold=0.4)
-y_pred_test = model.predict(X_test, threshold=0.4)
-print_metrics(y_train, y_pred_train, y_val, y_pred_val, y_test, y_pred_test, model)
