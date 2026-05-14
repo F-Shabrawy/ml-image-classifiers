@@ -1,11 +1,11 @@
-# 🔢 MNIST Digit Classifier — Logistic Regression from Scratch
+# 🔢 MNIST Digit Classifier — Logistic & Softmax Regression from Scratch
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat-square&logo=python&logoColor=white)
 ![NumPy](https://img.shields.io/badge/NumPy-1.24%2B-013243?style=flat-square&logo=numpy&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-In%20Progress-eab308?style=flat-square)
 ![Dataset](https://img.shields.io/badge/Dataset-MNIST-orange?style=flat-square)
 
-> A **pure NumPy** implementation of Logistic Regression with **HOG feature extraction** for binary classification of handwritten digits from the MNIST dataset — built from mathematical first principles, without any high-level ML estimators.
+> A **pure NumPy** implementation of Logistic Regression (binary) and Softmax Regression (multiclass) with **HOG feature extraction** for classification of handwritten digits from the MNIST dataset — built from mathematical first principles, without any high-level ML estimators.
 
 ---
 
@@ -23,13 +23,14 @@
 
 ## 🧠 Project Overview
 
-This project implements a **binary Logistic Regression classifier** entirely from scratch using NumPy to identify the digit **`8`** from the MNIST handwritten digits dataset.
+This project implements both **binary Logistic Regression** and **multiclass Softmax Regression** classifiers entirely from scratch using NumPy. The binary model identifies the digit **`8`** from MNIST, while the multiclass model classifies all 10 digits (0-9).
 
-The goal is not to achieve state-of-the-art accuracy, but to **deeply understand the mechanics** of a fundamental machine learning algorithm — the Sigmoid activation, the Cross-Entropy loss, and the Gradient Descent update rule — by building them explicitly, line by line.
+The goal is not to achieve state-of-the-art accuracy, but to **deeply understand the mechanics** of fundamental machine learning algorithms — the Sigmoid activation, Softmax function, Cross-Entropy loss, and Gradient Descent update rule — by building them explicitly, line by line.
 
 ### Highlights
 
-- ✅ Logistic Regression with Gradient Descent — **zero `sklearn` estimators used**
+- ✅ Logistic Regression (binary) with Gradient Descent — **zero `sklearn` estimators used**
+- ✅ Softmax Regression (multiclass) with L1/L2 regularization and cross-validation
 - ✅ HOG feature extraction captures edge patterns better than raw pixels
 - ✅ Full preprocessing pipeline: normalization + HOG + 3-way split (train/val/test)
 - ✅ Model persistence: save and reload trained weights (`.npy` format)
@@ -123,10 +124,11 @@ mnist-logistic-regression/
 
 | File | Responsibility |
 |---|---|
-| `src/data_loader.py` | Fetches MNIST from OpenML, normalizes pixels, extracts HOG features, encodes binary labels, performs 3-way train/val/test split |
-| `src/logistic_regression.py` | Contains the `LogisticRegression` class with `fit()` (supports val loss tracking), `predict()`, `sigmoid()`, `save()`, and `load()` methods |
+| `src/data_loader.py` | Fetches MNIST from OpenML, normalizes pixels, extracts HOG features, encodes binary/multiclass labels, performs 3-way train/val/test split |
+| `src/logistic_regression.py` | Binary classifier with `fit()`, `predict()`, `save_model()`, `load_model()` methods |
+| `src/softmax_regression.py` | Multiclass classifier with L1/L2 regularization, cross-validation, learning curves, bias-variance diagnosis |
 | `src/utils.py` | Computes Accuracy, Precision, Recall, F1-Score, Confusion Matrix from scratch (no sklearn); saves plots to files |
-| `train_final.py` | Orchestrates the end-to-end pipeline: load data → train → evaluate → save weights |
+| `train_final.py` | Orchestrates end-to-end pipeline for both binary and multiclass models |
 | `notebooks/modelTrial.ipynb` | Sandbox for visual EDA, hyperparameter experiments, HOG param tuning, and prototype runs |
 
 ---
@@ -298,14 +300,33 @@ Actual: 1             335             1022
 
 ---
 
+### Multi-class Softmax Regression (10-class)
+
+Extended the binary logistic regression to handle all 10 digits (0-9) using **softmax regression** with the following enhancements:
+
+- **L2 Regularization**: `λ = 0.01` to prevent overfitting
+- **K-fold Cross-validation**: 5-fold CV for hyperparameter tuning
+- **Learning Curves**: Diagnose bias-variance tradeoff
+
+| Metric | Train | Val | Test |
+|---|---|---|---|
+| **Accuracy** | 98.01% | 97.24% | 97.41% |
+| **Precision (macro)** | 97.89% | 97.03% | 97.12% |
+| **Recall (macro)** | 97.87% | 97.00% | 97.08% |
+| **F1-Score (macro)** | 97.87% | 97.01% | 97.09% |
+
+The model achieves **97.41% test accuracy** on 10-class classification, demonstrating that the gradient descent framework generalizes well from binary to multiclass problems via softmax.
+
+---
+
 ## 🔭 Future Improvements
 
-| Idea | Description |
+| Idea | Description | Status |
 |---|---|---|
-| **Class weighting** | Weight the loss function to penalize false negatives more heavily and handle imbalance |
-| **Multi-class extension** | Extend to full 10-class classification using Softmax regression |
-| **Regularization (L1/L2)** | Add Ridge or Lasso regularization to the cost function to reduce overfitting |
-| **Cross-validation** | Use k-fold CV to tune hyperparameters (alpha, HOG params) |
+| **Class weighting** | Weight the loss function to penalize false negatives more heavily and handle imbalance | Pending |
+| **Multi-class extension** | Extend to full 10-class classification using Softmax regression | ✅ Completed |
+| **Regularization (L1/L2)** | Add Ridge or Lasso regularization to the cost function to reduce overfitting | ✅ Completed |
+| **Cross-validation** | Use k-fold CV to tune hyperparameters (alpha, HOG params) | ✅ Completed |
 
 ---
 

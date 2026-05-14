@@ -1,21 +1,25 @@
 import numpy as np
-from src.data_loader import load_mnist
-from src.utils import print_metrics
+from data_loader import load_mnist
+from utils import print_metrics
 
 def sigmoid(z):
+    # squashes any real number into a probability between 0 and 1
     return 1 / (1 + np.exp(-z))
 
 def calculate_gradient(theta, X, y):
+    # average gradient of the binary cross-entropy loss
     m = y.size
     return X.T @ (sigmoid(X @ theta) - y) / m
 
 def compute_loss(y, y_hat):
+    # binary cross-entropy loss with clipping for numerical stability
     m = y.size
     epsilon = 1e-15
     y_hat = np.clip(y_hat, epsilon, 1 - epsilon)
     return - (1 / m) * np.sum(y * np.log(y_hat) + (1 - y) * np.log(1 - y_hat))
 
 def predict_prob(X, theta):
+    # add bias column then compute probability
     X_b = np.c_[np.ones((X.shape[0], 1)), X]
     return sigmoid(X_b @ theta)
 
@@ -30,7 +34,7 @@ class LogisticRegression:
         self.actual_iter = 0
 
     def fit(self, X, y, X_val=None, y_val=None):
-        # stick a 1 column on for bias
+        # add bias column of ones
         X_b = np.c_[np.ones((X.shape[0], 1)), X]
         self.theta = np.zeros(X_b.shape[1])
 
@@ -43,7 +47,7 @@ class LogisticRegression:
             self.losses.append(loss)
             self.actual_iter = i + 1
 
-            # track validation loss too, helps spot overfitting
+            # track validation loss to spot overfitting early
             if X_val is not None and y_val is not None:
                 X_val_b = np.c_[np.ones((X_val.shape[0], 1)), X_val]
                 y_val_hat = sigmoid(X_val_b @ self.theta)
@@ -53,12 +57,13 @@ class LogisticRegression:
             grad = calculate_gradient(self.theta, X_b, y)
             self.theta -= self.alpha * grad
 
-            # stop if gradient gets flat enough
+            # stop when the gradient is nearly zero (converged)
             if np.linalg.norm(grad) < self.tolerance:
                 break
         return self.theta
 
     def predict(self, X, threshold=0.5):
+        # probability >= threshold means positive class
         return (predict_prob(X, self.theta) >= threshold).astype(int)
 
     def save_model(self, file_path):
@@ -66,15 +71,14 @@ class LogisticRegression:
 
     def load_model(self, file_path):
         self.theta = np.load(file_path)
-X_train, X_val, X_test, y_train, y_val, y_test = load_mnist()
 
 model = LogisticRegression(alpha=1.3, num_iter=2000)
 model.fit(X_train, y_train, X_val=X_val, y_val=y_val)
 print(f"iterations: {model.actual_iter}")
 if model.losses:
-    print(f"Final Train Loss: {model.losses[-1]:.4f}")
+    print(f"final train loss: {model.losses[-1]:.4f}")
 if model.val_losses:
-    print(f"Final Val Loss: {model.val_losses[-1]:.4f}")
+    print(f"final val loss: {model.val_losses[-1]:.4f}")
 
 y_pred_train = model.predict(X_train, threshold=0.4)
 y_pred_val = model.predict(X_val, threshold=0.4)
