@@ -11,7 +11,7 @@ def train_binary():
 
     X_train, X_val, X_test, y_train, y_val, y_test = load_mnist()
 
-    model = LogisticRegression(alpha=1.3, num_iter=2000)
+    model = LogisticRegression(alpha=1.3, num_iter=500)
     model.fit(X_train, y_train, X_val=X_val, y_val=y_val)
 
     os.makedirs('models', exist_ok=True)
@@ -37,7 +37,7 @@ def train_multiclass():
 
     X_train, X_val, X_test, y_train, y_val, y_test = load_mnist_multiclass()
 
-    model = SoftmaxRegression(alpha=1.3, num_iter=2000, lambda_=0.01, reg_type='l2')
+    model = SoftmaxRegression(alpha=1.3, num_iter=500, lambda_=0.01, reg_type='l2')
     model.fit(X_train, y_train, X_val=X_val, y_val=y_val)
 
     os.makedirs('models', exist_ok=True)

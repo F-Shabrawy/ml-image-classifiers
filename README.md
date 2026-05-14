@@ -131,32 +131,32 @@ The script will:
 
 ### Binary Classification — Digit `8` vs. Rest
 
-> Training config: 2000 iterations · α = 1.3 · HOG features (or=9, ppc=4×4, cpb=3×3)
+> Training config: 500 iterations · α = 1.3 · HOG features (or=9, ppc=4×4, cpb=3×3)
 
 | Metric | Train | Validation | Test |
 |:---|:---:|:---:|:---:|
-| Accuracy | 98.60 % | 98.30 % | 98.47 % |
-| Precision | 93.47 % | 92.20 % | 92.68 % |
-| Recall | 92.08 % | 91.04 % | 90.51 % |
-| F1-Score | 92.77 % | 91.61 % | 91.58 % |
+| Accuracy | 98.16 % | 97.94 % | **98.10 %** |
+| Precision | 91.77 % | 90.25 % | 90.48 % |
+| Recall | 89.12 % | 89.50 % | 88.65 % |
+| F1-Score | 90.42 % | 89.87 % | 89.55 % |
 
 ### Multiclass Softmax — 10-Class
 
-> Training config: 2000 iterations · α = 1.3 · L2 λ = 0.01 · 5-fold CV
+> Training config: 500 iterations · α = 1.3 · L2 λ = 0.01
 
 | Metric | Train | Validation | Test |
 |:---|:---:|:---:|:---:|
-| Accuracy | 98.01 % | 97.24 % | **97.41 %** |
-| Precision (macro) | 97.89 % | 97.03 % | 97.12 % |
-| Recall (macro) | 97.87 % | 97.00 % | 97.08 % |
-| F1-Score (macro) | 97.87 % | 97.01 % | 97.09 % |
+| Accuracy | 97.14 % | 96.61 % | **96.87 %** |
+| Precision (macro) | 97.13 % | 96.60 % | 96.85 % |
+| Recall (macro) | 97.13 % | 96.61 % | 96.84 % |
+| F1-Score (macro) | 97.12 % | 96.60 % | 96.84 % |
 
 ### Key Observations
 
-- **HOG features boosted recall from ~75 % (raw pixels) to >90 %**, demonstrating that edge-orientation histograms capture digit structure far more effectively than flat pixel intensities.
+- **HOG features boosted recall from ~75 % (raw pixels) to >88 %**, demonstrating that edge-orientation histograms capture digit structure far more effectively than flat pixel intensities.
 - The train–validation gap stays **under 1 %** across all metrics, indicating strong generalization with no overfitting.
-- Convergence is reached in **2 000 iterations** with HOG versus 15 000 iterations required with raw pixels — a **7.5× speedup**.
-- The softmax model achieves **97.41 % test accuracy** on the full 10-class task, validating that the gradient descent framework scales cleanly from binary to multiclass problems.
+- Convergence is reached in **500 iterations** with HOG versus 15 000 iterations required with raw pixels — a significant speedup.
+- The softmax model achieves **96.87 % test accuracy** on the full 10-class task, validating that the gradient descent framework scales cleanly from binary to multiclass problems.
 
 ---
 
